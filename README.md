@@ -380,7 +380,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-**Project Link**: [https://github.com/yourusername/federated-learning-project](https://github.com/alwaysgodly/federated-learning-project)
+**Project Link**: [https://github.com/alwaysgodly/federated-learning-project](https://github.com/alwaysgodly/federated-learning-project)
 
 For questions or suggestions, please open an issue or contact the maintainers.
 
