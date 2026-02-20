@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Keyboard Federated Learning Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .scenario {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #2196F3;
+        }
+
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .device-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+        .device-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .device-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .device-icon {
+            font-size: 40px;
+            margin-right: 15px;
+        }
+
+        .device-info h3 {
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .device-info p {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .device-stats {
+            margin: 15px 0;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .battery-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .battery-bar {
+            flex: 1;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .battery-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s;
+        }
+
+        .charging-icon {
+            font-size: 20px;
+            display: none;
+        }
+
+        .charging-icon.active {
+            display: block;
+            animation: pulse 1s infinite;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .status-ready {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-updating {
+            background: #2196F3;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-skipped {
+            background: #FFC107;
+            color: #856404;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .night-banner {
+            background: linear-gradient(135deg, #1a237e, #311b92);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .night-banner h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .night-banner p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+
+        .results {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .accuracy-display {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .accuracy-box {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-width: 200px;
+            margin: 10px;
+        }
+
+        .accuracy-box .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .accuracy-box .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2196F3;
+        }
+
+        .privacy-banner {
+            background: #e8f5e9;
+            border: 2px solid #4CAF50;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .privacy-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .privacy-item {
+            display: flex;
+            align-items: center;
+            color: #2e7d32;
+        }
+
+        .privacy-item::before {
+            content: "✓";
+            width: 25px;
+            height: 25px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .log-container {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 20px 0;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .log-time {
+            color: #6c757d;
+            margin-right: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2196F3, #03A9F4);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .real-world {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+        }
+
+        .real-world h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .company-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .company-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .company-card .logo {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .company-card .name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .company-card .users {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 Mobile Keyboard Federated Learning Demo</h1>
+            <p>Privacy-Preserving Keyboard Prediction Improvement</p>
+            
+            <div class="scenario">
+                <h3>📋 Scenario:</h3>
+                <ul style="margin-left: 20px;">
+                    <li>Smartphone company wants to improve keyboard predictions</li>
+                    <li>Millions of users typing every day</li>
+                    <li>DON'T want to collect users' private messages</li>
+                    <li>Each phone learns locally, only shares model improvements</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="privacy-banner">
+            <h3 style="color: #2e7d32; margin-bottom: 10px;">🔒 Privacy Guarantees</h3>
+            <div class="privacy-items">
+                <div class="privacy-item">Messages never leave device</div>
+                <div class="privacy-item">No cloud storage of typing data</div>
+                <div class="privacy-item">User data stays private</div>
+                <div class="privacy-item">Only model updates shared</div>
+            </div>
+        </div>
+
+        <div class="night-banner" id="nightBanner">
+            <h2>☀️ Day Time</h2>
+            <p>Users are typing on their phones...</p>
+        </div>
+
+        <div class="devices-grid" id="devicesGrid">
+            <div style="text-align: center; padding: 40px; grid-column: 1/-1;">
+                <p style="color: white; font-size: 1.2em;">Click Initialize to set up devices...</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h2>🎮 Training Controls</h2>
+            <div class="button-group">
+                <button class="btn-primary" onclick="initialize()" id="initBtn">Initialize System</button>
+                <button class="btn-success" onclick="trainNight()" id="trainBtn" disabled>Train Overnight</button>
+                <button class="btn-danger" onclick="reset()" id="resetBtn">Reset</button>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <h3>Training Progress</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="real-world">
+            <h3>🌟 Real Companies Using This Technology</h3>
+            <div class="company-grid">
+                <div class="company-card">
+                    <div class="logo">📱</div>
+                    <div class="name">Google GBoard</div>
+                    <div class="users">1+ billion devices</div>
+                </div>
+                <div class="company-card">
+                    <div class="logo">🍎</div>
+                    <div class="name">Apple iOS Keyboard</div>
+                    <div class="users">All iPhones & iPads</div>
+                </div>
+                <div class="company-card">
+                    <div class="logo">💬</div>
+                    <div class="name">WhatsApp</div>
+                    <div class="users">2+ billion users</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results">
+            <h2>📊 Training Results</h2>
+            
+            <div class="accuracy-display">
+                <div class="accuracy-box">
+                    <div class="label">Current Night</div>
+                    <div class="value" id="currentNight">0</div>
+                </div>
+                <div class="accuracy-box">
+                    <div class="label">Prediction Quality</div>
+                    <div class="value" id="globalAccuracy">--%</div>
+                </div>
+                <div class="accuracy-box">
+                    <div class="label">Improvement</div>
+                    <div class="value" id="improvement">+0%</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="accuracyChart" width="800" height="300"></canvas>
+            </div>
+
+            <h3>📝 Training Log</h3>
+            <div class="log-container" id="trainingLog">
+                <div class="log-entry">
+                    <span class="log-time">[--:--:--]</span>
+                    <span>System ready. Click Initialize to begin.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let maxNights = 4;
+        let accuracies = [];
+        let devices = [];
+        let isNight = false;
+
+        function addLog(message) {
+            const log = document.getElementById('trainingLog');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span><span>${message}</span>`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function initialize() {
+            addLog('🔄 Initializing mobile keyboard system...');
+            document.getElementById('initBtn').disabled = true;
+            
+            try {
+                const response = await fetch('/api/initialize', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    devices = data.devices;
+                    maxNights = data.max_nights;
+                    renderDevices();
+                    document.getElementById('trainBtn').disabled = false;
+                    addLog('✅ System initialized successfully!');
+                    addLog(`📱 ${devices.length} devices connected`);
+                } else {
+                    addLog('❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                addLog('❌ Error: ' + error);
+            }
+        }
+
+        function renderDevices() {
+            const grid = document.getElementById('devicesGrid');
+            grid.innerHTML = devices.map(d => `
+                <div class="device-card" id="device-${d.id}">
+                    <div class="device-header">
+                        <div class="device-icon">${d.icon}</div>
+                        <div class="device-info">
+                            <h3>${d.device_id}</h3>
+                            <p>${d.profile}</p>
+                        </div>
+                    </div>
+                    <div class="device-stats">
+                        <div class="stat-row">
+                            <span class="stat-label">Typing Samples</span>
+                            <span class="stat-value">${d.typing_samples}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Data Location</span>
+                            <span class="stat-value">On Device</span>
+                        </div>
+                    </div>
+                    <div class="battery-indicator">
+                        <span class="charging-icon" id="charging-${d.id}">⚡</span>
+                        <div class="battery-bar">
+                            <div class="battery-fill" id="battery-${d.id}" style="width: ${d.battery}%"></div>
+                        </div>
+                        <span>${d.battery}%</span>
+                    </div>
+                    <span class="status-badge status-ready" id="status-${d.id}">Ready</span>
+                </div>
+            `).join('');
+        }
+
+        async function trainNight() {
+            isNight = true;
+            updateNightBanner();
+            addLog('🌙 Night time - Devices charging and updating...');
+            document.getElementById('trainBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/train_night', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    accuracies = data.all_accuracies;
+                    updateResults(data);
+                    
+                    data.device_results.forEach(dr => {
+                        const badge = document.getElementById(`status-${dr.id}`);
+                        const chargingIcon = document.getElementById(`charging-${dr.id}`);
+                        
+                        if (dr.status === 'updated') {
+                            badge.className = 'status-badge status-updating';
+                            badge.textContent = `Updating...`;
+                            chargingIcon.classList.add('active');
+                            
+                            setTimeout(() => {
+                                badge.className = 'status-badge status-ready';
+                                badge.textContent = `Updated`;
+                                chargingIcon.classList.remove('active');
+                            }, 2000);
+                            
+                            addLog(`✅ ${dr.device_id}: Model updated`);
+                        } else {
+                            badge.className = 'status-badge status-skipped';
+                            badge.textContent = dr.reason;
+                            addLog(`⏭️ ${dr.device_id}: ${dr.reason}`);
+                        }
+                    });
+                    
+                    addLog(`📊 Night ${data.night} complete - Quality: ${(data.accuracy * 100).toFixed(2)}%`);
+                    addLog(`🔒 Privacy maintained - No messages shared`);
+                    
+                    setTimeout(() => {
+                        isNight = false;
+                        updateNightBanner();
+                        if (data.night < maxNights) {
+                            document.getElementById('trainBtn').disabled = false;
+                            addLog('☀️ Morning - Users wake up to better predictions!');
+                        } else {
+                            addLog('🎉 Training complete! All nights finished.');
+                        }
+                    }, 3000);
+                } else {
+                    addLog('❌ Error: ' + data.error);
+                    document.getElementById('trainBtn').disabled = false;
+                }
+            } catch (error) {
+                addLog('❌ Error: ' + error);
+                document.getElementById('trainBtn').disabled = false;
+            }
+        }
+
+        function updateNightBanner() {
+            const banner = document.getElementById('nightBanner');
+            if (isNight) {
+                banner.innerHTML = '<h2>🌙 Night Time</h2><p>Devices charging and updating models...</p>';
+                banner.style.background = 'linear-gradient(135deg, #0d47a1, #1565c0)';
+            } else {
+                banner.innerHTML = '<h2>☀️ Day Time</h2><p>Users typing on their phones...</p>';
+                banner.style.background = 'linear-gradient(135deg, #1a237e, #311b92)';
+            }
+        }
+
+        function updateResults(data) {
+            document.getElementById('currentNight').textContent = `${data.night}/${maxNights}`;
+            document.getElementById('globalAccuracy').textContent = `${(data.accuracy * 100).toFixed(1)}%`;
+            
+            if (accuracies.length > 1) {
+                const improvement = (accuracies[accuracies.length - 1] - accuracies[0]) * 100;
+                document.getElementById('improvement').textContent = `+${improvement.toFixed(1)}%`;
+            }
+            
+            const progress = (data.night / maxNights) * 100;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = `${progress.toFixed(0)}%`;
+            
+            drawChart();
+        }
+
+        function drawChart() {
+            const canvas = document.getElementById('accuracyChart');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 40;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            if (accuracies.length === 0) {
+                ctx.fillStyle = '#666';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('No training data yet', width / 2, height / 2);
+                return;
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+            
+            // Labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Night', width / 2, height - 10);
+            
+            ctx.save();
+            ctx.translate(15, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Prediction Quality', 0, 0);
+            ctx.restore();
+            
+            // Draw data
+            const maxAcc = Math.max(...accuracies, 0.8);
+            const minAcc = Math.min(...accuracies, 0);
+            const xStep = (width - 2 * padding) / (maxNights - 1);
+            const yScale = (height - 2 * padding) / (maxAcc - minAcc);
+            
+            ctx.strokeStyle = '#2196F3';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            accuracies.forEach((acc, i) => {
+                const x = padding + i * xStep;
+                const y = height - padding - (acc - minAcc) * yScale;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+                
+                ctx.fillStyle = '#2196F3';
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.fillStyle = '#333';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${(acc * 100).toFixed(1)}%`, x, y - 10);
+            });
+            
+            ctx.strokeStyle = '#2196F3';
+            ctx.stroke();
+        }
+
+        async function reset() {
+            if (confirm('Reset the training? This will clear all progress.')) {
+                addLog('🔄 Resetting system...');
+                
+                try {
+                    await fetch('/api/reset', { method: 'POST' });
+                    
+                    accuracies = [];
+                    devices = [];
+                    isNight = false;
+                    updateNightBanner();
+                    document.getElementById('devicesGrid').innerHTML = '<div style="text-align: center; padding: 40px; grid-column: 1/-1;"><p style="color: white; font-size: 1.2em;">Click Initialize to set up devices...</p></div>';
+                    document.getElementById('currentNight').textContent = '0';
+                    document.getElementById('globalAccuracy').textContent = '--%';
+                    document.getElementById('improvement').textContent = '+0%';
+                    document.getElementById('progressBar').style.width = '0%';
+                    document.getElementById('progressBar').textContent = '0%';
+                    document.getElementById('initBtn').disabled = false;
+                    document.getElementById('trainBtn').disabled = true;
+                    
+                    drawChart();
+                    addLog('✅ System reset complete');
+                } catch (error) {
+                    addLog('❌ Error: ' + error);
+                }
+            }
+        }
+
+        window.onload = () => {
+            drawChart();
+        };
+    </script>
+</body>
+</html>

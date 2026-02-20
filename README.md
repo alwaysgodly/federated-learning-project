@@ -3,8 +3,11 @@
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Complete-success.svg)]()
+[![Web Apps](https://img.shields.io/badge/Web_Apps-3-orange.svg)]()
 
 A complete implementation of **Federated Learning** that addresses critical challenges in centralized machine learning: privacy, security, bandwidth efficiency, data localization, and scalable coordination.
+
+**New:** 🌐 Interactive web applications with real-world use case demonstrations!
 
 ![Training Results](results/training_results.png)
 
@@ -53,6 +56,11 @@ A complete implementation of **Federated Learning** that addresses critical chal
 - FedAvg aggregation algorithm
 - Multi-client support
 
+✅ **Interactive Web Applications** 🆕
+- 3 industry-specific web demos
+- Real-time visualization
+- Production-quality UI/UX
+
 ---
 
 ## 📊 Results
@@ -93,15 +101,29 @@ cd federated-learning-project
 pip install -r requirements.txt
 ```
 
-### Run Demo
+### Run Demos
 
-#### Windows
+#### CLI Demo (Windows)
 ```bash
 # Option 1: Double-click
 run_demo.bat
 
 # Option 2: Command line
 python demos/main_demo.py
+```
+
+#### Web Apps 🆕
+```bash
+cd web_apps
+pip install Flask
+
+# Launch menu
+launch.bat
+
+# Or run individually:
+python healthcare_app.py      # Port 5000
+python mobile_keyboard_app.py # Port 5001
+python financial_fraud_app.py # Port 5002
 ```
 
 #### Linux/Mac
@@ -119,6 +141,58 @@ Privacy: Raw data (1.01 MB) NEVER transmitted ✓
 
 ---
 
+## 🌐 Interactive Web Applications 🆕
+
+Experience federated learning through beautiful, interactive web interfaces!
+
+### 1. Healthcare Demo 🏥
+**URL:** http://localhost:5000
+
+- 3 hospitals collaborating on disease prediction
+- HIPAA compliance visualization
+- Real-time training progress
+- Patient data privacy guaranteed
+
+```bash
+cd web_apps
+python healthcare_app.py
+```
+
+### 2. Mobile Keyboard Demo 📱
+**URL:** http://localhost:5001
+
+- 6 mobile devices with different user profiles
+- Day/night training cycle
+- Real company examples (Google GBoard, Apple, WhatsApp)
+- Message privacy protection
+
+```bash
+cd web_apps
+python mobile_keyboard_app.py
+```
+
+### 3. Financial Fraud Detection 💰
+**URL:** http://localhost:5002
+
+- 4 international banks (USA, UK, Germany, France)
+- Real-time fraud detection metrics
+- Money saved calculator
+- GDPR & PCI-DSS compliance
+
+```bash
+cd web_apps
+python financial_fraud_app.py
+```
+
+**Features:**
+- ✅ Real-time interactive visualizations
+- ✅ Accuracy charts with live updates
+- ✅ Privacy guarantee indicators
+- ✅ Training logs and metrics
+- ✅ Beautiful, modern UI design
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -129,10 +203,27 @@ federated_learning_project/
 │   ├── fl_client.py             # Client-side training & privacy
 │   └── data_utils.py            # Data partitioning utilities
 │
-├── demos/                        # Demonstration scripts
+├── demos/                        # CLI demonstration scripts
 │   ├── main_demo.py             # Full automated demo
 │   ├── interactive_demo.py      # Customizable parameters
 │   └── comparison_demo.py       # Centralized vs Federated
+│
+├── use_cases/                    # Real-world use case demos 🆕
+│   ├── healthcare_demo.py       # Multi-hospital collaboration
+│   ├── mobile_keyboard_demo.py  # Keyboard prediction
+│   ├── financial_fraud_demo.py  # Cross-bank fraud detection
+│   └── README.md
+│
+├── web_apps/                     # Interactive web applications 🆕
+│   ├── templates/
+│   │   ├── healthcare.html      # Healthcare UI
+│   │   ├── mobile.html          # Mobile keyboard UI
+│   │   └── financial.html       # Financial fraud UI
+│   ├── healthcare_app.py        # Healthcare Flask app
+│   ├── mobile_keyboard_app.py   # Mobile keyboard Flask app
+│   ├── financial_fraud_app.py   # Financial fraud Flask app
+│   ├── launch.bat               # Easy launcher
+│   └── README.md
 │
 ├── docs/                         # Documentation
 │   ├── QUICKSTART.md            # 5-minute setup guide
@@ -299,21 +390,47 @@ Total Parameters: ~4,810 (0.037 MB)
 - **[Implementation Details](docs/IMPLEMENTATION.md)** - Technical deep dive
 - **[Presentation Guide](docs/PRESENTATION.md)** - Present the project
 - **[Windows Setup](WINDOWS_QUICKSTART.md)** - Windows-specific instructions
+- **[Use Cases README](use_cases/README.md)** - Real-world applications
+- **[Web Apps README](web_apps/README.md)** - Interactive demos
 
 ---
 
-## 🎓 Use Cases
+## 🎓 Real-World Use Cases
 
-### Healthcare
+### 1. Healthcare 🏥
+**Demo:** `use_cases/healthcare_demo.py` | **Web App:** Port 5000
+
 Train diagnostic models across hospitals without sharing patient records (HIPAA compliant)
 
-### Mobile Devices
-Improve keyboard predictions and autocorrect without uploading user data (Google GBoard)
+**Features:**
+- Multi-hospital collaboration
+- Patient privacy protection
+- Better disease detection
+- Regulatory compliance
 
-### Financial Services
+### 2. Mobile Devices 📱
+**Demo:** `use_cases/mobile_keyboard_demo.py` | **Web App:** Port 5001
+
+Improve keyboard predictions and autocorrect without uploading user data (Google GBoard, Apple)
+
+**Features:**
+- 1+ billion devices learning
+- Message privacy maintained
+- Better predictions
+- Real company examples
+
+### 3. Financial Services 💰
+**Demo:** `use_cases/financial_fraud_demo.py` | **Web App:** Port 5002
+
 Detect fraud collaboratively across banks while preserving customer privacy
 
-### IoT & Edge Computing
+**Features:**
+- Cross-border fraud detection
+- Transaction privacy
+- Millions saved
+- GDPR & PCI-DSS compliant
+
+### 4. IoT & Edge Computing
 Train smart home models locally with limited bandwidth
 
 ---
@@ -327,6 +444,8 @@ Train smart home models locally with limited bandwidth
 - [ ] Model personalization
 - [ ] Byzantine-robust aggregation
 - [ ] TensorFlow/PyTorch integration
+- [ ] Mobile app deployment
+- [ ] Additional web visualizations
 
 ---
 
@@ -351,6 +470,17 @@ Train smart home models locally with limited bandwidth
 
 ---
 
+## 🎬 Demos Available
+
+| Type | Count | Description |
+|------|-------|-------------|
+| **CLI Demos** | 3 | Command-line demonstrations |
+| **Use Cases** | 3 | Industry-specific scripts |
+| **Web Apps** | 3 | Interactive visualizations |
+| **Total** | **9** | Complete demo suite |
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -360,6 +490,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
@@ -371,18 +503,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **McMahan et al.** - Communication-Efficient Learning of Deep Networks from Decentralated Data (2017)
+- **McMahan et al.** - Communication-Efficient Learning of Deep Networks from Decentralized Data (2017)
 - **scikit-learn** - For the digits dataset
 - **NumPy** - Numerical computing
 - **Matplotlib** - Visualization
+- **Flask** - Web framework
 
 ---
 
 ## 📧 Contact
 
-**Project Link**: [https://github.com/yourusername/federated-learning-project](https://github.com/alwaysgodly/federated-learning-project)
+**Project Link**: [https://github.com/alwaysgodly/federated-learning-project](https://github.com/alwaysgodly/federated-learning-project)
 
-For questions or suggestions, please open an issue or contact the maintainers.
+For questions or suggestions, please open an issue.
 
 ---
 
@@ -394,11 +527,13 @@ If you find this project useful, please consider giving it a ⭐!
 
 ## 📊 Project Stats
 
-- **Total Lines of Code**: ~2,700+
-- **Python Files**: 6
-- **Documentation Files**: 5
+- **Total Lines of Code**: ~5,000+
+- **Python Files**: 12
+- **Documentation Files**: 8
 - **Demo Scripts**: 3
-- **Development Time**: Educational project
+- **Use Case Scripts**: 3
+- **Web Applications**: 3
+- **HTML Templates**: 3
 - **Status**: Complete & Production-Ready
 
 ---
@@ -414,6 +549,20 @@ By exploring this project, you will learn:
 ✅ Neural network training from scratch  
 ✅ Data partitioning strategies (IID vs Non-IID)  
 ✅ Communication-efficient ML  
+✅ Full-stack web development with Flask  
+✅ Real-world application deployment  
+
+---
+
+## 💡 Project Highlights
+
+- ✨ **Complete Implementation** - Not just a demo, production-ready code
+- 🎨 **Beautiful Web UIs** - Professional, interactive interfaces
+- 🌍 **Real-World Examples** - Google, Apple, hospitals, banks
+- 📚 **Comprehensive Docs** - Over 2,000 lines of documentation
+- 🎓 **Educational Value** - Perfect for learning federated learning
+- 💼 **Portfolio Ready** - Impressive for job applications
+- 🚀 **Easy to Run** - One command to get started
 
 ---
 
@@ -421,6 +570,10 @@ By exploring this project, you will learn:
 
 **Built with ❤️ for privacy-preserving machine learning**
 
-[⬆ Back to Top](#federated-learning-privacy-preserving-distributed-machine-learning)
+### [⬆ Back to Top](#federated-learning-privacy-preserving-distributed-machine-learning)
+
+---
+
+**Experience it live:** [Run the web apps](#-interactive-web-applications-) | **Read the docs:** [Documentation](#-documentation)
 
 </div>

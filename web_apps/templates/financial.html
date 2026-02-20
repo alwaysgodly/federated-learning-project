@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Fraud Detection - Federated Learning</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .scenario {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .banks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .bank-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+        
+        .bank-card:hover { transform: translateY(-5px); }
+        
+        .bank-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .bank-flag {
+            font-size: 40px;
+            margin-right: 15px;
+        }
+        
+        .bank-info h3 {
+            color: #333;
+            font-size: 1.3em;
+        }
+        
+        .bank-info p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .bank-stats {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        .fraud-counter {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .fraud-counter .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .fraud-counter .value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+        
+        .status-ready { background: #28a745; color: white; }
+        .status-analyzing { background: #17a2b8; color: white; animation: pulse 1.5s infinite; }
+        .status-complete { background: #6c757d; color: white; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .controls {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .results {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .metric-box {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .metric-box .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .metric-box .value {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        
+        .value-fraud { color: #dc3545; }
+        .value-money { color: #28a745; }
+        .value-accuracy { color: #007bff; }
+        
+        .privacy-banner {
+            background: #d1ecf1;
+            border: 2px solid #0c5460;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .privacy-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+        
+        .privacy-item {
+            display: flex;
+            align-items: center;
+            color: #0c5460;
+        }
+        
+        .privacy-item::before {
+            content: "✓";
+            width: 25px;
+            height: 25px;
+            background: #17a2b8;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .chart-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .log-container {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 20px 0;
+        }
+        
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .log-time {
+            color: #6c757d;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Financial Fraud Detection - Federated Learning</h1>
+            <p>Cross-Bank Collaborative Fraud Prevention</p>
+            
+            <div class="scenario">
+                <h3>📋 Scenario:</h3>
+                <ul style="margin-left: 20px;">
+                    <li>International fraud rings operate across multiple banks</li>
+                    <li>Banks want to detect fraud patterns collaboratively</li>
+                    <li>Cannot share customer transaction data (GDPR, PCI-DSS)</li>
+                    <li>Use federated learning to learn patterns without sharing data</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="privacy-banner">
+            <h3 style="color: #0c5460; margin-bottom: 10px;">🔒 Regulatory Compliance</h3>
+            <div class="privacy-items">
+                <div class="privacy-item">Transaction data stays local</div>
+                <div class="privacy-item">GDPR compliant</div>
+                <div class="privacy-item">PCI-DSS compliant</div>
+                <div class="privacy-item">Zero customer data shared</div>
+            </div>
+        </div>
+
+        <div class="banks-grid" id="banksGrid">
+            <div style="text-align: center; padding: 40px; grid-column: 1/-1; color: white;">
+                <p style="font-size: 1.2em;">Click Initialize to connect banks...</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h2>🎮 Training Controls</h2>
+            <div class="button-group">
+                <button class="btn-primary" onclick="initialize()" id="initBtn">Initialize System</button>
+                <button class="btn-success" onclick="trainRound()" id="trainBtn" disabled>Analyze & Train</button>
+                <button class="btn-danger" onclick="reset()" id="resetBtn">Reset</button>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <h3>Training Progress</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results">
+            <h2>📊 Fraud Detection Results</h2>
+            
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="label">Round</div>
+                    <div class="value value-accuracy" id="currentRound">0/6</div>
+                </div>
+                <div class="metric-box">
+                    <div class="label">Frauds Detected</div>
+                    <div class="value value-fraud" id="totalFraud">0</div>
+                </div>
+                <div class="metric-box">
+                    <div class="label">Money Saved</div>
+                    <div class="value value-money" id="moneySaved">$0</div>
+                </div>
+                <div class="metric-box">
+                    <div class="label">Detection Accuracy</div>
+                    <div class="value value-accuracy" id="detectionAccuracy">--%</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="accuracyChart" width="800" height="300"></canvas>
+            </div>
+
+            <h3>📝 Activity Log</h3>
+            <div class="log-container" id="trainingLog">
+                <div class="log-entry">
+                    <span class="log-time">[--:--:--]</span>
+                    <span>System ready. Click Initialize to begin.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let maxRounds = 6;
+        let accuracies = [];
+        let banks = [];
+        let totalFraudDetected = 0;
+
+        function addLog(message) {
+            const log = document.getElementById('trainingLog');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span><span>${message}</span>`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function initialize() {
+            addLog('🔄 Initializing cross-bank fraud detection network...');
+            document.getElementById('initBtn').disabled = true;
+            
+            try {
+                const response = await fetch('/api/initialize', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    banks = data.banks;
+                    maxRounds = data.max_rounds;
+                    renderBanks();
+                    document.getElementById('trainBtn').disabled = false;
+                    addLog('✅ Banking network initialized!');
+                    addLog(`🏦 ${banks.length} international banks connected`);
+                } else {
+                    addLog('❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                addLog('❌ Error: ' + error);
+            }
+        }
+
+        function renderBanks() {
+            const grid = document.getElementById('banksGrid');
+            grid.innerHTML = banks.map(b => `
+                <div class="bank-card">
+                    <div class="bank-header">
+                        <div class="bank-flag">${b.flag}</div>
+                        <div class="bank-info">
+                            <h3>${b.name}</h3>
+                            <p>${b.country}</p>
+                        </div>
+                    </div>
+                    <div class="bank-stats">
+                        <div class="stat-row">
+                            <span class="stat-label">Transactions</span>
+                            <span class="stat-value">${b.transaction_count.toLocaleString()}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Data Location</span>
+                            <span class="stat-value">${b.country}</span>
+                        </div>
+                    </div>
+                    <div class="fraud-counter" id="fraud-${b.id}">
+                        <div class="label">Frauds Caught</div>
+                        <div class="value">0</div>
+                    </div>
+                    <span class="status-badge status-ready" id="status-${b.id}">Ready</span>
+                </div>
+            `).join('');
+        }
+
+        async function trainRound() {
+            addLog('🔍 Banks analyzing transactions for fraud patterns...');
+            document.getElementById('trainBtn').disabled = true;
+            
+            banks.forEach(b => {
+                const badge = document.getElementById(`status-${b.id}`);
+                badge.className = 'status-badge status-analyzing';
+                badge.textContent = 'Analyzing...';
+            });
+
+            try {
+                const response = await fetch('/api/train_round', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    accuracies = data.all_accuracies;
+                    totalFraudDetected = data.total_fraud;
+                    updateResults(data);
+                    
+                    data.bank_results.forEach(br => {
+                        const badge = document.getElementById(`status-${br.id}`);
+                        const fraudCounter = document.getElementById(`fraud-${br.id}`);
+                        
+                        badge.className = 'status-badge status-complete';
+                        badge.textContent = `Analysis Complete`;
+                        fraudCounter.querySelector('.value').textContent = br.total_fraud;
+                        
+                        addLog(`✅ ${br.name}: Detected ${br.fraud_detected} frauds this round`);
+                    });
+                    
+                    addLog(`📊 Round ${data.round} complete - Accuracy: ${(data.accuracy * 100).toFixed(2)}%`);
+                    addLog(`🚨 Total frauds detected: ${data.round_fraud} cases`);
+                    addLog(`💰 Money saved: $${(data.round_fraud * 5000).toLocaleString()}`);
+                    addLog(`🔒 Zero transaction data shared`);
+                    
+                    if (data.round < maxRounds) {
+                        document.getElementById('trainBtn').disabled = false;
+                        setTimeout(() => {
+                            banks.forEach(b => {
+                                const badge = document.getElementById(`status-${b.id}`);
+                                badge.className = 'status-badge status-ready';
+                                badge.textContent = 'Ready';
+                            });
+                        }, 2000);
+                    } else {
+                        addLog('🎉 Training complete! Global fraud detection model ready.');
+                    }
+                } else {
+                    addLog('❌ Error: ' + data.error);
+                    document.getElementById('trainBtn').disabled = false;
+                }
+            } catch (error) {
+                addLog('❌ Error: ' + error);
+                document.getElementById('trainBtn').disabled = false;
+            }
+        }
+
+        function updateResults(data) {
+            document.getElementById('currentRound').textContent = `${data.round}/${maxRounds}`;
+            document.getElementById('totalFraud').textContent = data.total_fraud.toLocaleString();
+            document.getElementById('moneySaved').textContent = `$${(data.total_fraud * 5000).toLocaleString()}`;
+            document.getElementById('detectionAccuracy').textContent = `${(data.accuracy * 100).toFixed(1)}%`;
+            
+            const progress = (data.round / maxRounds) * 100;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = `${progress.toFixed(0)}%`;
+            
+            drawChart();
+        }
+
+        function drawChart() {
+            const canvas = document.getElementById('accuracyChart');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 40;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            if (accuracies.length === 0) {
+                ctx.fillStyle = '#666';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('No training data yet', width / 2, height / 2);
+                return;
+            }
+            
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Training Round', width / 2, height - 10);
+            
+            ctx.save();
+            ctx.translate(15, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Detection Accuracy', 0, 0);
+            ctx.restore();
+            
+            const maxAcc = Math.max(...accuracies, 0.8);
+            const minAcc = Math.min(...accuracies, 0);
+            const xStep = (width - 2 * padding) / (maxRounds - 1);
+            const yScale = (height - 2 * padding) / (maxAcc - minAcc);
+            
+            ctx.strokeStyle = '#dc3545';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            accuracies.forEach((acc, i) => {
+                const x = padding + i * xStep;
+                const y = height - padding - (acc - minAcc) * yScale;
+                
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+                
+                ctx.fillStyle = '#dc3545';
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.fillStyle = '#333';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${(acc * 100).toFixed(1)}%`, x, y - 10);
+            });
+            
+            ctx.strokeStyle = '#dc3545';
+            ctx.stroke();
+        }
+
+        async function reset() {
+            if (confirm('Reset the system? This will clear all progress.')) {
+                addLog('🔄 Resetting banking network...');
+                
+                try {
+                    await fetch('/api/reset', { method: 'POST' });
+                    
+                    accuracies = [];
+                    banks = [];
+                    totalFraudDetected = 0;
+                    document.getElementById('banksGrid').innerHTML = '<div style="text-align: center; padding: 40px; grid-column: 1/-1; color: white;"><p style="font-size: 1.2em;">Click Initialize to connect banks...</p></div>';
+                    document.getElementById('currentRound').textContent = '0/6';
+                    document.getElementById('totalFraud').textContent = '0';
+                    document.getElementById('moneySaved').textContent = '$0';
+                    document.getElementById('detectionAccuracy').textContent = '--%';
+                    document.getElementById('progressBar').style.width = '0%';
+                    document.getElementById('progressBar').textContent = '0%';
+                    document.getElementById('initBtn').disabled = false;
+                    document.getElementById('trainBtn').disabled = true;
+                    
+                    drawChart();
+                    addLog('✅ System reset complete');
+                } catch (error) {
+                    addLog('❌ Error: ' + error);
+                }
+            }
+        }
+
+        window.onload = () => drawChart();
+    </script>
+</body>
+</html>

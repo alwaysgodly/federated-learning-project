@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Federated Learning Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .scenario {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+        }
+
+        .scenario h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .scenario ul {
+            margin-left: 20px;
+            color: #856404;
+        }
+
+        .hospitals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .hospital-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .hospital-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .hospital-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .hospital-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .hospital-info h3 {
+            color: #333;
+            font-size: 1.3em;
+        }
+
+        .hospital-info p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .hospital-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .stat-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .status-waiting {
+            background: #ffc107;
+            color: #856404;
+        }
+
+        .status-training {
+            background: #17a2b8;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-complete {
+            background: #28a745;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .controls {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .results {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .results h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .progress-section {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .accuracy-display {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .accuracy-box {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-width: 200px;
+            margin: 10px;
+        }
+
+        .accuracy-box .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .accuracy-box .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .privacy-banner {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .privacy-banner h3 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .privacy-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .privacy-item {
+            display: flex;
+            align-items: center;
+            color: #155724;
+        }
+
+        .privacy-item::before {
+            content: "✓";
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            background: #28a745;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .log-container {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 20px 0;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .log-time {
+            color: #6c757d;
+            margin-right: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Healthcare Federated Learning Demo</h1>
+            <p>Multi-Hospital Disease Prediction - Privacy-Preserving Collaborative AI</p>
+            
+            <div class="scenario">
+                <h3>📋 Scenario:</h3>
+                <ul>
+                    <li>Three hospitals want to build a better disease detection model</li>
+                    <li>Cannot share patient records due to HIPAA regulations</li>
+                    <li>Use federated learning to train collaboratively while keeping data local</li>
+                    <li>Each hospital's patient data stays on their own secure servers</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="privacy-banner">
+            <h3>🔒 Privacy Guarantees</h3>
+            <div class="privacy-items">
+                <div class="privacy-item">Patient data never leaves hospitals</div>
+                <div class="privacy-item">HIPAA compliant architecture</div>
+                <div class="privacy-item">Zero patient records exchanged</div>
+                <div class="privacy-item">Secure model aggregation</div>
+            </div>
+        </div>
+
+        <div class="hospitals-grid" id="hospitalsGrid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Initializing hospitals...</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h2>🎮 Training Controls</h2>
+            <div class="button-group">
+                <button class="btn-primary" onclick="initialize()" id="initBtn">Initialize System</button>
+                <button class="btn-success" onclick="trainRound()" id="trainBtn" disabled>Train One Round</button>
+                <button class="btn-danger" onclick="reset()" id="resetBtn">Reset</button>
+            </div>
+            
+            <div class="progress-section" style="margin-top: 20px;">
+                <h3>Training Progress</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results">
+            <h2>📊 Training Results</h2>
+            
+            <div class="accuracy-display">
+                <div class="accuracy-box">
+                    <div class="label">Current Round</div>
+                    <div class="value" id="currentRound">0</div>
+                </div>
+                <div class="accuracy-box">
+                    <div class="label">Global Accuracy</div>
+                    <div class="value" id="globalAccuracy">--%</div>
+                </div>
+                <div class="accuracy-box">
+                    <div class="label">Improvement</div>
+                    <div class="value" id="improvement">+0%</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="accuracyChart" width="800" height="300"></canvas>
+            </div>
+
+            <h3>📝 Training Log</h3>
+            <div class="log-container" id="trainingLog">
+                <div class="log-entry">
+                    <span class="log-time">[--:--:--]</span>
+                    <span>System ready. Click Initialize to begin.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let maxRounds = 5;
+        let accuracies = [];
+        let hospitals = [];
+
+        function addLog(message) {
+            const log = document.getElementById('trainingLog');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span><span>${message}</span>`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function initialize() {
+            addLog('🔄 Initializing federated healthcare system...');
+            document.getElementById('initBtn').disabled = true;
+            
+            try {
+                const response = await fetch('/api/initialize', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    hospitals = data.hospitals;
+                    maxRounds = data.max_rounds;
+                    renderHospitals();
+                    document.getElementById('trainBtn').disabled = false;
+                    addLog('✅ System initialized successfully!');
+                    addLog(`📍 ${hospitals.length} hospitals connected`);
+                } else {
+                    addLog('❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                addLog('❌ Error: ' + error);
+            }
+        }
+
+        function renderHospitals() {
+            const grid = document.getElementById('hospitalsGrid');
+            grid.innerHTML = hospitals.map(h => `
+                <div class="hospital-card" id="hospital-${h.id}">
+                    <div class="hospital-header">
+                        <div class="hospital-icon" style="background: ${h.color}">🏥</div>
+                        <div class="hospital-info">
+                            <h3>${h.name}</h3>
+                            <p>${h.location}</p>
+                        </div>
+                    </div>
+                    <div class="hospital-stats">
+                        <div class="stat">
+                            <div class="stat-label">Patient Records</div>
+                            <div class="stat-value">${h.patient_count}</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Data Location</div>
+                            <div class="stat-value">Local</div>
+                        </div>
+                    </div>
+                    <span class="status-badge status-waiting" id="status-${h.id}">Ready</span>
+                </div>
+            `).join('');
+        }
+
+        async function trainRound() {
+            addLog('🚀 Starting training round...');
+            document.getElementById('trainBtn').disabled = true;
+            
+            // Update hospital status
+            hospitals.forEach(h => {
+                const badge = document.getElementById(`status-${h.id}`);
+                badge.className = 'status-badge status-training';
+                badge.textContent = 'Training...';
+            });
+
+            try {
+                const response = await fetch('/api/train_round', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    accuracies = data.all_accuracies;
+                    updateResults(data);
+                    
+                    // Update hospital status
+                    data.hospital_results.forEach(hr => {
+                        const badge = document.getElementById(`status-${hr.id}`);
+                        badge.className = 'status-badge status-complete';
+                        badge.textContent = `Complete (Loss: ${hr.loss.toFixed(4)})`;
+                        addLog(`✅ ${hr.name}: Training complete`);
+                    });
+                    
+                    addLog(`📊 Round ${data.round} complete - Accuracy: ${(data.accuracy * 100).toFixed(2)}%`);
+                    addLog(`🔒 Privacy maintained - No patient data shared`);
+                    
+                    if (data.round < maxRounds) {
+                        document.getElementById('trainBtn').disabled = false;
+                        // Reset status after 2 seconds
+                        setTimeout(() => {
+                            hospitals.forEach(h => {
+                                const badge = document.getElementById(`status-${h.id}`);
+                                badge.className = 'status-badge status-waiting';
+                                badge.textContent = 'Ready';
+                            });
+                        }, 2000);
+                    } else {
+                        addLog('🎉 Training complete! All rounds finished.');
+                    }
+                } else {
+                    addLog('❌ Error: ' + data.error);
+                    document.getElementById('trainBtn').disabled = false;
+                }
+            } catch (error) {
+                addLog('❌ Error: ' + error);
+                document.getElementById('trainBtn').disabled = false;
+            }
+        }
+
+        function updateResults(data) {
+            const round = data.round;
+            const accuracy = data.accuracy;
+            
+            // Update displays
+            document.getElementById('currentRound').textContent = `${round}/${maxRounds}`;
+            document.getElementById('globalAccuracy').textContent = `${(accuracy * 100).toFixed(1)}%`;
+            
+            if (accuracies.length > 1) {
+                const improvement = (accuracies[accuracies.length - 1] - accuracies[0]) * 100;
+                document.getElementById('improvement').textContent = `+${improvement.toFixed(1)}%`;
+            }
+            
+            // Update progress bar
+            const progress = (round / maxRounds) * 100;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = `${progress.toFixed(0)}%`;
+            
+            // Update chart
+            drawChart();
+        }
+
+        function drawChart() {
+            const canvas = document.getElementById('accuracyChart');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 40;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            if (accuracies.length === 0) {
+                ctx.fillStyle = '#666';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('No training data yet', width / 2, height / 2);
+                return;
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+            
+            // Draw labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Training Round', width / 2, height - 10);
+            
+            ctx.save();
+            ctx.translate(15, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Accuracy', 0, 0);
+            ctx.restore();
+            
+            // Draw data
+            const maxAcc = Math.max(...accuracies, 0.8);
+            const minAcc = Math.min(...accuracies, 0);
+            const xStep = (width - 2 * padding) / (maxRounds - 1);
+            const yScale = (height - 2 * padding) / (maxAcc - minAcc);
+            
+            ctx.strokeStyle = '#28a745';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            accuracies.forEach((acc, i) => {
+                const x = padding + i * xStep;
+                const y = height - padding - (acc - minAcc) * yScale;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+                
+                // Draw point
+                ctx.fillStyle = '#28a745';
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Draw value
+                ctx.fillStyle = '#333';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${(acc * 100).toFixed(1)}%`, x, y - 10);
+            });
+            
+            ctx.strokeStyle = '#28a745';
+            ctx.stroke();
+        }
+
+        async function reset() {
+            if (confirm('Reset the training? This will clear all progress.')) {
+                addLog('🔄 Resetting system...');
+                
+                try {
+                    await fetch('/api/reset', { method: 'POST' });
+                    
+                    accuracies = [];
+                    hospitals = [];
+                    document.getElementById('hospitalsGrid').innerHTML = '<div class="loading"><div class="spinner"></div><p>Ready to initialize...</p></div>';
+                    document.getElementById('currentRound').textContent = '0';
+                    document.getElementById('globalAccuracy').textContent = '--%';
+                    document.getElementById('improvement').textContent = '+0%';
+                    document.getElementById('progressBar').style.width = '0%';
+                    document.getElementById('progressBar').textContent = '0%';
+                    document.getElementById('initBtn').disabled = false;
+                    document.getElementById('trainBtn').disabled = true;
+                    
+                    drawChart();
+                    addLog('✅ System reset complete');
+                } catch (error) {
+                    addLog('❌ Error: ' + error);
+                }
+            }
+        }
+
+        // Initialize chart on load
+        window.onload = () => {
+            drawChart();
+        };
+    </script>
+</body>
+</html>
