@@ -5,6 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Healthcare Federated Learning Demo</title>
     <style>
+        .scenario {
+    background: #1e293b !important;
+    border-left: 5px solid #facc15 !important;
+}
+
+.scenario h3,
+.scenario ul,
+.scenario li {
+    color: #f1f5f9 !important;
+}
+        .header,
+        .controls,
+        .results,
+        .hospital-card,
+        .bank-card,
+        .device-card,
+        .metric-box,
+        .accuracy-box,
+        .company-card,
+        .stat,
+        .chart-container,
+        .log-container,
+        .privacy-banner,
+        .real-world {
+            background: #1e293b !important;
+            color: #f1f5f9 !important;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6) !important;
+        }
+
+        h1, h2, h3, h4, h5, h6,
+p,
+.stat-label,
+.stat-value,
+.label,
+.value,
+li {
+    color: #f1f5f9 !important;
+}
         * {
             margin: 0;
             padding: 0;
@@ -12,11 +50,12 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #0f172a;
+    color: #f1f5f9;
+    min-height: 100vh;
+    padding: 20px;
+}
 
         .container {
             max-width: 1400px;
@@ -321,26 +360,34 @@
             font-weight: bold;
         }
 
-        .log-container {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            max-height: 300px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            margin: 20px 0;
-        }
+       .log-container {
+    background: #0f172a;
+    padding: 20px;
+    border-radius: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    margin: 20px 0;
+    border: 1px solid #334155;
+}
 
-        .log-entry {
-            padding: 5px 0;
-            border-bottom: 1px solid #dee2e6;
-        }
+.log-entry {
+    padding: 8px 10px;
+    border-bottom: 1px solid #1e293b;
+    color: #e2e8f0;
+    transition: background 0.2s ease;
+}
 
-        .log-time {
-            color: #6c757d;
-            margin-right: 10px;
-        }
+.log-entry:hover {
+    background: #1e293b;
+}
+
+.log-time {
+    color: #38bdf8;
+    margin-right: 10px;
+    font-weight: bold;
+}
 
         .loading {
             text-align: center;
@@ -596,7 +643,7 @@
             ctx.clearRect(0, 0, width, height);
             
             if (accuracies.length === 0) {
-                ctx.fillStyle = '#666';
+                ctx.fillStyle = '#e2e8f0';
                 ctx.font = '16px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText('No training data yet', width / 2, height / 2);
@@ -604,7 +651,7 @@
             }
             
             // Draw axes
-            ctx.strokeStyle = '#333';
+            ctx.strokeStyle = '#94a3b8';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(padding, padding);
@@ -613,7 +660,7 @@
             ctx.stroke();
             
             // Draw labels
-            ctx.fillStyle = '#333';
+            ctx.fillStyle = '#e2e8f0';
             ctx.font = '12px Arial';
             ctx.textAlign = 'center';
             ctx.fillText('Training Round', width / 2, height - 10);
@@ -630,7 +677,7 @@
             const xStep = (width - 2 * padding) / (maxRounds - 1);
             const yScale = (height - 2 * padding) / (maxAcc - minAcc);
             
-            ctx.strokeStyle = '#28a745';
+            ctx.strokeStyle = '#94a3b8';
             ctx.lineWidth = 3;
             ctx.beginPath();
             
@@ -645,19 +692,19 @@
                 }
                 
                 // Draw point
-                ctx.fillStyle = '#28a745';
+                ctx.fillStyle = '#e2e8f0';
                 ctx.beginPath();
                 ctx.arc(x, y, 5, 0, 2 * Math.PI);
                 ctx.fill();
                 
                 // Draw value
-                ctx.fillStyle = '#333';
+                ctx.fillStyle = '#e2e8f0';
                 ctx.font = '10px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText(`${(acc * 100).toFixed(1)}%`, x, y - 10);
             });
             
-            ctx.strokeStyle = '#28a745';
+            ctx.strokeStyle = '#94a3b8';
             ctx.stroke();
         }
 
